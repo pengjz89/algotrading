@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 
 //+------------------------------------------------------------------+
-//|                                                     Reversal.mq5 |
+//|                                                    Fibonacci.mq4 |
 //|                                                        Code4FIRE |
 //|                        Reversal Fibo Strategy with Trailing Stop |
 //+------------------------------------------------------------------+
@@ -23,13 +23,13 @@ input ushort   input_trailingstop            = 38;           //trailing stop
 input ushort   input_trailingstep            = 42;           //trailing step
 
 input double   input_trailing_max_lots       = 0.02;        // trailing maximum lots
-input ulong    input_magicnumber             = 1111;        // magic number
+input int      input_magicnumber             = 1111;        // magic number
 
 //input bool                 input_closebyposition         = false;
 
 //-- Symbol and Timeframe in Expert Advisor
 ENUM_TIMEFRAMES   m_time_frame;                             //variable for storing the time frame
-string            m_ptradecomment = "C4F-Fibo-TS:";
+string            m_ptradecomment = "C4F-R-Fibo-TS:";
 string            m_tradecomment = "";
 
 double            m_trade_stop_loss = 0;                         //variable for stoploss
@@ -47,8 +47,10 @@ string close_comment_timeinterval = "timeinterval";
 string close_comment_stop_loss = "stoploss";
 string close_comment_take_profit = "takeprofit";
 
+int LastBars = 0;
 int MyDigits;
 double MyPoint;
+extern int Slippage = 100; 	// Tolerated slippage in brokers' pips
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -212,7 +214,9 @@ bool checkForOpenPosition()
 void runTrailingStepNStop()
   {
 
-    if(!is_new_bar()) return;
+    // Trade only if new bar has arrived
+    if (LastBars != Bars) LastBars = Bars;
+    else return(0);
 
     for(int i=OrdersTotal()-1; i>=0; i--)
     {
@@ -313,7 +317,7 @@ void open_position(int pos_type)
     stop_loss_level=NormalizeDouble(ask_price-m_trade_stop_loss,Digits);
     take_profit_level=NormalizeDouble(ask_price+m_trade_take_profit,Digits);
 
-    ticket = OrderSend(Symbol(),pos_type,m_lots,ask_price,3,stop_loss_level,take_profit_level,m_tradecomment,input_magicnumber,0,Green);
+    ticket = OrderSend(Symbol(),pos_type,m_lots,ask_price,Slippage,stop_loss_level,take_profit_level,m_tradecomment,input_magicnumber,0,Green);
     if(ticket<0)
       {
         Print("OrderSend failed with error #",GetLastError());
@@ -329,7 +333,7 @@ void open_position(int pos_type)
     stop_loss_level=NormalizeDouble(bid_price+m_trade_stop_loss,Digits);
     take_profit_level=NormalizeDouble(bid_price-m_trade_take_profit,Digits);
 
-    ticket = OrderSend(Symbol(),pos_type,m_lots,bid_price,3,stop_loss_level,take_profit_level,m_tradecomment,input_magicnumber,0,Red);
+    ticket = OrderSend(Symbol(),pos_type,m_lots,bid_price,Slippage,stop_loss_level,take_profit_level,m_tradecomment,input_magicnumber,0,Red);
     //m_trade.Sell(m_lots,NULL,bid_price,stop_loss_level,take_profit_level,m_tradecomment);
     if(ticket<0)
     {
