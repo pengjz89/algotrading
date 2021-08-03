@@ -105,8 +105,8 @@ void OnTick()
    int history_deal_deal_type = NULL;
 
    if(!checkForOpenPosition())
-     {
-      int totalHistoryDeals = OrdersHistoryTotal()-1;
+   {
+      int totalHistoryDeals = OrdersHistoryTotal();
       if(totalHistoryDeals <= 1)
       {
          //This is for first trade
@@ -134,7 +134,7 @@ void OnTick()
 
          if(history_deal_profit>0)  {
             m_lots = input_lots;
-            if(history_deal_deal_type==OP_BUY)   {
+            if(history_deal_deal_type == OP_BUY)   {
                m_tradecomment = m_ptradecomment + "TP:M_BUY";
                open_position(OP_BUY);
             }
@@ -150,7 +150,7 @@ void OnTick()
             }
             m_lots = fibo_lots[fibo_lots_count];
             
-            if(history_deal_deal_type==OP_BUY)   {
+            if(history_deal_deal_type == OP_BUY)   {
                m_tradecomment = m_ptradecomment + "SL:R_SELL";
                open_position(OP_SELL);
             }
