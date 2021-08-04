@@ -105,14 +105,15 @@ void OnTick()
    int history_deal_deal_type = NULL;
 
   if(!checkForOpenPosition()) {
-      int totalHistoryDeals = OrdersHistoryTotal();
+      /*int totalHistoryDeals = OrdersHistoryTotal()-1;
       if(totalHistoryDeals <= 1)  {
          //This is for first trade
         open_position(OP_SELL);
         return;
       }
-      else  {
-        for(int i=totalHistoryDeals; i>=0; i--)   {
+      else  {*/
+        for(int i=OrdersHistoryTotal(); i>=0; i--)   {
+          if (OrderSelect(i,SELECT_BY_POS, MODE_HISTORY) == true) {
           if(OrderSymbol () != Symbol() && OrderMagicNumber() != input_magicnumber) continue;           
           
             history_deal_profit = OrderProfit();
@@ -123,6 +124,7 @@ void OnTick()
             Print("history | deal type: " + history_deal_deal_type);
             Print("history | deal number: " + i);
             break;
+          }
           
         }
 
@@ -134,7 +136,7 @@ void OnTick()
                m_tradecomment = m_ptradecomment + "TP:M_BUY";
                open_position(OP_BUY);
             }
-            else  {
+            if(history_deal_deal_type == OP_SELL) {
                m_tradecomment = m_ptradecomment + "TP:M_SELL";
                open_position(OP_SELL);
             }
@@ -150,12 +152,12 @@ void OnTick()
                m_tradecomment = m_ptradecomment + "SL:R_SELL";
                open_position(OP_SELL);
             }
-            else  {
+            if(history_deal_deal_type == OP_SELL) {
                m_tradecomment = m_ptradecomment + "SL:R_BUY";
                open_position(OP_BUY);
             }
          }
-      }
+      //}
   }
   else  {
     runTrailingStepNStop();
@@ -196,9 +198,10 @@ bool checkForOpenPosition()
 {
    for(int i=OrdersTotal()-1; i>=0; i--)           
    {
-      if(!OrderSelect(i,SELECT_BY_POS,MODE_TRADES))  continue;
-      if(OrderMagicNumber() != input_magicnumber) continue;
-      return true;
+      if(OrderSelect(i,SELECT_BY_POS,MODE_TRADES)==false) break;
+      if(OrderSymbol()==Symbol() && OrderMagicNumber()==input_magicnumber) {
+         return true;
+      }
    }
    return false;
 }
