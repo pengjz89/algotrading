@@ -91,7 +91,7 @@ void OnDeinit(const int reason)
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
 void OnTick()
-  {
+{
 
    add_fibo_lots_value();
 
@@ -104,21 +104,17 @@ void OnTick()
 
    int history_deal_deal_type = NULL;
 
-   if(!checkForOpenPosition())
-   {
+  if(!checkForOpenPosition()) {
       int totalHistoryDeals = OrdersHistoryTotal();
-      if(totalHistoryDeals <= 1)
-      {
+      if(totalHistoryDeals <= 1)  {
          //This is for first trade
         open_position(OP_SELL);
         return;
       }
-      else
-      {
-
+      else  {
         for(int i=totalHistoryDeals; i>=0; i--)   {
-          if(OrderSymbol () != Symbol()) continue;
-          if(OrderMagicNumber() == input_magicnumber && OrderSymbol() == Symbol())  {                
+          if(OrderSymbol () != Symbol() && OrderMagicNumber() != input_magicnumber) continue;           
+          
             history_deal_profit = OrderProfit();
             Print("history | deal profit: " + history_deal_profit);
             history_deal_volume = OrderLots();
@@ -127,7 +123,7 @@ void OnTick()
             Print("history | deal type: " + history_deal_deal_type);
             Print("history | deal number: " + i);
             break;
-          }
+          
         }
 
          Comment(m_ptradecomment + "|hvol:" + history_deal_volume + "|htype:" + history_deal_deal_type + "|hprofit: " + history_deal_profit);
@@ -143,7 +139,7 @@ void OnTick()
                open_position(OP_SELL);
             }
          }
-         else  {
+         if (history_deal_profit<= 0)  {
             int fibo_lots_count = ArrayBsearch(fibo_lots, history_deal_volume);
             if(fibo_lots_count < 15)   {
                fibo_lots_count = fibo_lots_count + 1;
@@ -158,14 +154,14 @@ void OnTick()
                m_tradecomment = m_ptradecomment + "SL:R_BUY";
                open_position(OP_BUY);
             }
-           }
-        }
-     }
-    else  {
-      runTrailingStepNStop();
-    }
-   return;
+         }
+      }
   }
+  else  {
+    runTrailingStepNStop();
+  }
+  return;
+}
 
 //+------------------------------------------------------------------+
 //| Fibo Lots for Incremental Reversal                               |
